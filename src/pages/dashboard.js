@@ -25,7 +25,6 @@ class Dashboard extends Component {
 
   getList = async () => {
     this.setState({ isLoading: true })
-    this.setState({ todoList: [] })
     const todoList = await api.getList()
     this.setState({ todoList })
     return this.setState({ isLoading: false })

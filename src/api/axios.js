@@ -2,17 +2,24 @@ import axios from 'axios'
 import Swal from 'sweetalert2'
 
 const API_URL = 'https://veripag-node-todolist.glitch.me'
-const token = localStorage.getItem('token')
-const headers = {
-  'Content-Type': "application/json",
-  'Authorization': token
-}
+
+const api = axios.create({
+  baseURL: API_URL
+})
+
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('token')
+  if (config.token) {
+    config.headers.Authorization = token
+  }
+  return config
+})
 
 export const login = async ({ email, password }) => {
   try {
-    const response = await axios.post(`${API_URL}/login`, {
-      email: "teste@example.com",
-      password: "veripag"
+    const response = await api.post('login', {
+      email,
+      password
     })
     localStorage.setItem('token', response.data.token)
     localStorage.setItem('logged', true)
@@ -33,8 +40,7 @@ export const login = async ({ email, password }) => {
 
 export const getList = async () => {
   try {
-    const response = await axios.get(`${API_URL}/todos`, { headers })
-    console.log('API', response.data)
+    const response = await api.get('todos', { token: true })
     return response.data
   } catch (error) {
     Swal.fire({
@@ -48,7 +54,7 @@ export const getList = async () => {
 
 export const endTodo = async ({ todoId }) => {
   try {
-    const response = await axios.put(`${API_URL}/todos/${todoId}`, { done: true }, { headers })
+    const response = await api.put(`todos/${todoId}`, { done: true }, { token: true })
     return response.data
   } catch (error) {
     Swal.fire({
@@ -61,7 +67,7 @@ export const endTodo = async ({ todoId }) => {
 
 export const deleteTodo = async ({ todoId }) => {
   try {
-    const response = await axios.delete(`${API_URL}/todos/${todoId}`, { headers })
+    const response = await api.delete(`todos/${todoId}`, { token: true })
     return response.data
   } catch (error) {
     Swal.fire({
@@ -74,7 +80,7 @@ export const deleteTodo = async ({ todoId }) => {
 
 export const createTodo = async ({ description }) => {
   try {
-    const response = await axios.post(`${API_URL}/todos/`,{ description }, { headers })
+    const response = await api.post('todos',{ description }, { token: true })
     return response.data
   } catch (error) {
     Swal.fire({
@@ -87,7 +93,7 @@ export const createTodo = async ({ description }) => {
 
 export const editTodo = async ({ todoId, description }) => {
   try {
-    const response = await axios.put(`${API_URL}/todos/${todoId}`, { description }, { headers })
+    const response = await api.put(`todos/${todoId}`, { description }, { token: true })
     return response.data
   } catch (error) {
     Swal.fire({
